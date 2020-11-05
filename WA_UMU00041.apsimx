@@ -24,7 +24,11 @@
           "VariableNames": [
             "[Clock].Today",
             "[Soil].OutputLayers.SWmm",
-            "[Soil].OutputLayers.SW"
+            "[Soil].OutputLayers.SW",
+            "[Soil].SoilNitrogen.NH4.kgha[1:8]",
+            "sum([Soil].SoilNitrogen.NH4.kgha[9:30]) as NH4Remainder",
+            "//[Soil].OutputLayers.NH4",
+            "//[Soil].OutputLayers.Urea"
           ],
           "EventNames": [
             "[Clock].DoReport"
@@ -49,7 +53,7 @@
             "sum([Soil].WEIRDO.SWmm) as ProfileWater",
             "sum([Soil].WEIRDO.SWmm[1:20]) as ProfileWater1m",
             "sum([Soil].WEIRDO.PAWCmm) as PAWCmm",
-            "sum([Soil].WEIRDO.PAWmm) as PAWmm"
+            "sum([Soil].OutputLayers.PAWmm) as PAW"
           ],
           "EventNames": [
             "[Clock].DoReport"
@@ -78,7 +82,8 @@
             "[Wheat].Total.Wt"
           ],
           "EventNames": [
-            "[Clock].DoReport"
+            "[Wheat].Harvesting",
+            "//[Clock].DoReport"
           ],
           "GroupByVariableName": null,
           "Name": "ReportCrop",
@@ -122,7 +127,7 @@
       "Children": [
         {
           "$type": "Models.Memo, Models",
-          "Text": "The Dalyup site is a long-term study of effects of claying on water repellence. Tenosols (deep sands) to Sodosols (deep duplex soils).\r\n\r\n3 Reps, 30m x 100 m block\r\n\r\nFive clay rates in 1998: 0, 50, 100, 200, 300 t/ha\r\n\r\nSpading in 2012. Depths: 0, 15, 40 cm\r\n\r\ncrop rotation 2004 - 2007: canola (Hyola 501), barley (Gardiner), lupin (Tanjil), canola (Tornado)\r\n\r\ncrop rotation 2012-2014: pasture (seradella), wheat(cv Mace) and canola (cv Jackpot)\r\n\r\n###simulations required\r\n1. Water repellence \r\n2. Nutrient accumulation? With different moisture content of the soil in clayed and un-clayed soil, resulting in different OC and N. Currently the SoilNutrient module doesn't handle P and K. These need to be addressed later.\r\n3. Improved emergence (this may need to be accounted for through manager script)",
+          "Text": "## Issues with WEIRDO\r\n1. NO solute transport\r\n2. soilNitrogen not mapped to the 5cm interval that WEIRDO uses\r\n\r\n\r\n#Experiment description\r\n\r\nThe Dalyup site is a long-term study of effects of claying on water repellence. Tenosols (deep sands) to Sodosols (deep duplex soils).\r\n\r\n3 Reps, 30m x 100 m block\r\n\r\nFive clay rates in 1998: 0, 50, 100, 200, 300 t/ha\r\n\r\nSpading in 2012. Depths: 0, 15, 40 cm\r\n\r\ncrop rotation 2004 - 2007: canola (Hyola 501), barley (Gardiner), lupin (Tanjil), canola (Tornado)\r\n\r\ncrop rotation 2012-2014: pasture (seradella), wheat(cv Mace) and canola (cv Jackpot)\r\n\r\n###simulations required\r\n1. Water repellence \r\n2. Nutrient accumulation? With different moisture content of the soil in clayed and un-clayed soil, resulting in different OC and N. Currently the SoilNutrient module doesn't handle P and K. These need to be addressed later.\r\n3. Improved emergence (this may need to be accounted for through manager script)\r\n",
           "Name": "Memo",
           "Children": [],
           "IncludeInDocumentation": true,
@@ -211,26 +216,26 @@
                         0.41
                       ],
                       "CFlow": [
-                        0.49,
-                        0.424,
-                        0.369,
-                        0.399,
-                        0.401,
-                        0.686,
-                        0.211,
-                        0.211,
-                        0.211
+                        1.59,
+                        1.38,
+                        1.33,
+                        1.42,
+                        1.44,
+                        2.32,
+                        2.86,
+                        2.86,
+                        2.86
                       ],
                       "XFlow": [
-                        3.02,
-                        3.05,
-                        3.07,
-                        3.06,
-                        3.06,
-                        3.0,
-                        3.25,
-                        3.25,
-                        3.25
+                        3.38,
+                        3.4,
+                        3.44,
+                        3.43,
+                        3.43,
+                        3.36,
+                        3.42,
+                        3.42,
+                        3.42
                       ],
                       "PsiBub": [
                         -10.0,
@@ -288,8 +293,8 @@
                         0.0
                       ],
                       "BD": [
-                        1.4,
-                        1.45,
+                        1.5,
+                        1.7,
                         1.5,
                         1.5,
                         1.5,
@@ -317,6 +322,9 @@
                       "MappedUpperRepellentWC": null,
                       "MappedLowerRepellentWC": null,
                       "MappedMinRepellancyFactor": null,
+                      "MappedNH4": null,
+                      "MappedUrea": null,
+                      "MappedNO3": null,
                       "ProfileWaterExtraction": 0.0,
                       "TotalCover": 0.0,
                       "ResidueWater": 0.0,
@@ -467,26 +475,26 @@
                         0.41
                       ],
                       "CFlow": [
-                        0.49,
-                        0.424,
-                        0.369,
-                        0.399,
-                        0.401,
-                        0.686,
-                        0.211,
-                        0.211,
-                        0.211
+                        1.59,
+                        1.38,
+                        1.33,
+                        1.42,
+                        1.44,
+                        2.32,
+                        2.86,
+                        2.86,
+                        2.86
                       ],
                       "XFlow": [
-                        3.02,
-                        3.05,
-                        3.07,
-                        3.06,
-                        3.06,
-                        3.0,
-                        3.25,
-                        3.25,
-                        3.25
+                        3.38,
+                        3.4,
+                        3.44,
+                        3.43,
+                        3.43,
+                        3.36,
+                        3.42,
+                        3.42,
+                        3.42
                       ],
                       "PsiBub": [
                         -10.0,
@@ -544,8 +552,8 @@
                         0.0
                       ],
                       "BD": [
-                        1.4,
-                        1.45,
+                        1.5,
+                        1.7,
                         1.5,
                         1.5,
                         1.5,
@@ -573,6 +581,9 @@
                       "MappedUpperRepellentWC": null,
                       "MappedLowerRepellentWC": null,
                       "MappedMinRepellancyFactor": null,
+                      "MappedNH4": null,
+                      "MappedUrea": null,
+                      "MappedNO3": null,
                       "ProfileWaterExtraction": 0.0,
                       "TotalCover": 0.0,
                       "ResidueWater": 0.0,
@@ -723,26 +734,26 @@
                         0.41
                       ],
                       "CFlow": [
-                        0.49,
-                        0.424,
-                        0.369,
-                        0.399,
-                        0.401,
-                        0.686,
-                        0.211,
-                        0.211,
-                        0.211
+                        1.59,
+                        1.38,
+                        1.33,
+                        1.42,
+                        1.44,
+                        2.32,
+                        2.86,
+                        2.86,
+                        2.86
                       ],
                       "XFlow": [
-                        3.02,
-                        3.05,
-                        3.07,
-                        3.06,
-                        3.06,
-                        3.0,
-                        3.25,
-                        3.25,
-                        3.25
+                        3.38,
+                        3.4,
+                        3.44,
+                        3.43,
+                        3.43,
+                        3.36,
+                        3.42,
+                        3.42,
+                        3.42
                       ],
                       "PsiBub": [
                         -10.0,
@@ -800,8 +811,8 @@
                         0.0
                       ],
                       "BD": [
-                        1.4,
-                        1.45,
+                        1.5,
+                        1.7,
                         1.5,
                         1.5,
                         1.5,
@@ -829,6 +840,9 @@
                       "MappedUpperRepellentWC": null,
                       "MappedLowerRepellentWC": null,
                       "MappedMinRepellancyFactor": null,
+                      "MappedNH4": null,
+                      "MappedUrea": null,
+                      "MappedNO3": null,
                       "ProfileWaterExtraction": 0.0,
                       "TotalCover": 0.0,
                       "ResidueWater": 0.0,
@@ -924,8 +938,8 @@
           "Children": [
             {
               "$type": "Models.Clock, Models",
-              "Start": "2004-05-01T00:00:00",
-              "End": "2004-11-30T00:00:00",
+              "Start": "2011-01-26T00:00:00",
+              "End": "2012-01-30T00:00:00",
               "Name": "Clock",
               "Children": [],
               "IncludeInDocumentation": true,
@@ -1032,6 +1046,9 @@
                       "MappedUpperRepellentWC": null,
                       "MappedLowerRepellentWC": null,
                       "MappedMinRepellancyFactor": null,
+                      "MappedNH4": null,
+                      "MappedUrea": null,
+                      "MappedNO3": null,
                       "ProfileWaterExtraction": 0.0,
                       "TotalCover": 0.0,
                       "ResidueWater": 0.0,
@@ -1586,7 +1603,7 @@
                     },
                     {
                       "Key": "FertiliserDates",
-                      "Value": "01-jul"
+                      "Value": "01-may"
                     },
                     {
                       "Key": "Amount",
@@ -1612,18 +1629,99 @@
                   "ReadOnly": false
                 },
                 {
+                  "$type": "Models.PMF.Plant, Models",
+                  "ResourceName": "Slurp",
+                  "Name": "Slurp",
+                  "IncludeInDocumentation": true,
+                  "Enabled": false,
+                  "ReadOnly": false
+                },
+                {
+                  "$type": "Models.Manager, Models",
+                  "Code": "\nusing Models.PMF.Organs;\nusing System;\nusing Models.Core;\nusing Models.PMF;\nusing APSIM.Shared.Utilities;\n        \nnamespace Models\n{\n    [Serializable] \n    [System.Xml.Serialization.XmlInclude(typeof(Model))]\n    public class Script : Model\n    {\n        [Link] private Plant Slurp;\n        [Link] private Clock Clock;\n        [Link] private Zone zone;\n        [Link(Type = LinkType.Path, Path = \"[Slurp].Root\")]\n        private Root root;\n\n        [Description(\"Cultivar\")]\n        public string CultivarName { get; set; }\n        [Description(\"Initial Root Depth\")]\n        public double InitialRootDepth { get; set; }\n        [Description(\"Sowing Date\")]\n        public DateTime SowingDate { get; set; }\n        [Description(\"Stop Root Date\")]\n        public DateTime StopRootDate { get; set; }\n        [Description(\"Maximum Stomatal Conductance\")]\n        public double MaxG { get; set; }\n        [Description(\"Stomatal Radn response\")]\n        public double R50 { get; set; }\n               \n        [EventSubscribe(\"DoManagement\")]\n        private void OnDoManagement(object sender, EventArgs e)\n        {\n            if (Clock.Today.Date == SowingDate)\n            {\n                Slurp.Sow(cultivar: CultivarName, population: 1, depth: InitialRootDepth, rowSpacing: 150);\n                object LeafPartFrac = 0.9;\n                zone.Set(\"Slurp.Leaf.DMDemands.Structural.DMDemandFunction.PartitionFraction.FixedValue\", LeafPartFrac);\n                object RootPartFrac = 0.1;\n                zone.Set(\"Slurp.Root.DMDemands.Structural.DMDemandFunction.PartitionFraction.FixedValue\", RootPartFrac);\n                object GMaxValue = MaxG;\n                zone.Set(\"Slurp.Leaf.Gsmax350\", GMaxValue); \n                object R50Value = R50; \n                zone.Set(\"Slurp.Leaf.R50\", R50Value); \n            }\n            //Potato.Sow(... Contains the following arguements:\n            //Population  double  Optional  Seeds sowing/m2.  Default is zero\n            //Cultivar    string  Required  \"NameOfCultivar\"\n            //Depth       double  Optional  Depth (mm) seed sown.   Default is 100mm \n            //MaxCover    double  Optional  Proportion (0-1) of the ground row crop will cover.   Default is 1.0\n            //BudNumber   double  Optional  Number of mainstems per seed sown.  Default is 1.0\n            //RowSpacing  double  Optional  Spaceing (mm) between drill rows when crop is sown.  Default is 150mm\n            //CropClass   string  Optional  Crop class to instantiate when crop is sown.  Default is \"Plant\"\n            \n            if (Clock.Today.Date == StopRootDate)\n            {\n                object LeafPartFrac = 0.4;\n                zone.Set(\"Slurp.Leaf.DMDemands.Structural.DMDemandFunction.PartitionFraction.FixedValue\", LeafPartFrac);\n                object RootPartFrac = 0.6;\n                zone.Set(\"Slurp.Root.DMDemands.Structural.DMDemandFunction.PartitionFraction.FixedValue\", RootPartFrac);\n            }\n        }\n    }\n}\n                \n",
+                  "Parameters": [
+                    {
+                      "Key": "CultivarName",
+                      "Value": "Lucerne"
+                    },
+                    {
+                      "Key": "InitialRootDepth",
+                      "Value": "15"
+                    },
+                    {
+                      "Key": "SowingDate",
+                      "Value": "03/14/2011 00:00:00"
+                    },
+                    {
+                      "Key": "StopRootDate",
+                      "Value": "07/14/2012 00:00:00"
+                    },
+                    {
+                      "Key": "MaxG",
+                      "Value": "0.007"
+                    },
+                    {
+                      "Key": "R50",
+                      "Value": "175"
+                    }
+                  ],
+                  "Name": "SlurpSowingRule",
+                  "IncludeInDocumentation": true,
+                  "Enabled": false,
+                  "ReadOnly": false
+                },
+                {
+                  "$type": "Models.Manager, Models",
+                  "Code": "using System.Data;\nusing APSIM.Shared.Utilities;\nusing System.Xml.Serialization;\nusing Models;\nusing Models.PMF;\nusing System.Text;\nusing System.Collections.Generic;\nusing Models.Core;\nusing System;\n\nnamespace Models\n{\n    [Serializable] \n    //[System.Xml.Serialization.XmlInclude(typeof(Model))]\n    public class Script : Model\n    {\n        [Link] Plant SCRUM;\n        [Link] Clock Clock;\n        [Link] Zone zone;\n        [Link] Simulation Simulation;\n        \n        [Description(\"File of Yields\")]\n        public string CoverFile { get; set; }\n        [Description(\"Extinction coefficient\")]\n        public  double Ext_coef { get; set; }\n        [Description(\"Maximum height of the crop at full cover\")]\n        public double MaximumHeight { get; set; }\n        \n        [XmlIgnore] private DataTable Covers { get; set; }\n\n        public string Cover { get; set; }\n        public string Irrigation { get; set; }\n        public string Treatment { get; set; }\n        \n        private double CoverRead { get; set; }\n        public double leaflai { get; private set; }\n                \n        [EventSubscribe(\"StartOfSimulation\")]\n        private void OnStartOfSimulation(object sender, EventArgs e)\n        {\n            \n            Treatment = \"Lucerne_\" + Irrigation;\n            \n            string fullFileName = PathUtilities.GetAbsolutePath(CoverFile, Simulation.FileName);\n            \n            ApsimTextFile textFile = new ApsimTextFile();\n            textFile.Open(fullFileName);\n            Covers = textFile.ToTable();\n            textFile.Close();\n        }\n        \n        [EventSubscribe(\"StartOfDay\")]\n        private void OnStartOfDay(object sender, EventArgs e)\n        {\n            foreach (DataRow row in Covers.Rows)\n            {\n                DateTime TodayDate = Convert.ToDateTime(row[\"Date\"]);\n                if (TodayDate.Date == Clock.Today.Date)\n                {\n                    CoverRead = Convert.ToDouble(row[Treatment]);\n                }\n            }\n        \n            if ((bool)zone.Get(\"Slurp.IsAlive\") == true)\n            {\n                //Only assign cover values if crop is emerged\n                \n                if (CoverRead == 1)\n                    leaflai = Math.Log(0.01) / -Ext_coef;\n                else\n                {\n                    if (CoverRead > 0)\n                        leaflai = Math.Log(1 - CoverRead) / -Ext_coef;\n                    else\n                        leaflai = 0;\n                }\n                //Summary.WriteMessage(this, \"LAI \" + leaflai);\n                object LAIResetValue = leaflai;\n                zone.Set(\"Slurp.Leaf.Area.FixedValue\", LAIResetValue);  \n                object HeightResetValue = CoverRead * MaximumHeight;\n                zone.Set(\"Slurp.Leaf.Tallness.FixedValue\", HeightResetValue);  \n            }\n        }\n    }\n}\n                \n",
+                  "Parameters": [
+                    {
+                      "Key": "CoverFile",
+                      "Value": "%root%\\Tests\\Validation\\Slurp\\ShallowSoilTest\\CoverInterpolated.csv"
+                    },
+                    {
+                      "Key": "Ext_coef",
+                      "Value": "0.8"
+                    },
+                    {
+                      "Key": "MaximumHeight",
+                      "Value": "600"
+                    },
+                    {
+                      "Key": "Cover",
+                      "Value": ""
+                    },
+                    {
+                      "Key": "Irrigation",
+                      "Value": ""
+                    },
+                    {
+                      "Key": "Treatment",
+                      "Value": ""
+                    },
+                    {
+                      "Key": "leaflai",
+                      "Value": "0"
+                    }
+                  ],
+                  "Name": "SetCropVariables",
+                  "IncludeInDocumentation": true,
+                  "Enabled": false,
+                  "ReadOnly": false
+                },
+                {
                   "$type": "Models.Report, Models",
                   "VariableNames": [
                     ""
                   ],
                   "EventNames": [
+                    "[Wheat].Harvesting",
                     "[Clock].DoReport"
                   ],
                   "GroupByVariableName": null,
                   "Name": "ReportCrop",
                   "Children": [],
                   "IncludeInDocumentation": true,
-                  "Enabled": true,
+                  "Enabled": false,
                   "ReadOnly": false
                 },
                 {
@@ -1687,72 +1785,26 @@
                   "IncludeInDocumentation": true,
                   "Enabled": true,
                   "ReadOnly": false
-                }
-              ],
-              "IncludeInDocumentation": true,
-              "Enabled": true,
-              "ReadOnly": false
-            },
-            {
-              "$type": "Models.Graph, Models",
-              "Caption": null,
-              "Axis": [
-                {
-                  "$type": "Models.Axis, Models",
-                  "Type": 3,
-                  "Title": "Date",
-                  "Inverted": false,
-                  "Minimum": "NaN",
-                  "Maximum": "NaN",
-                  "Interval": "NaN",
-                  "DateTimeAxis": false,
-                  "CrossesAtZero": false
                 },
                 {
-                  "$type": "Models.Axis, Models",
-                  "Type": 0,
-                  "Title": "Yield (kg/ha)",
-                  "Inverted": false,
-                  "Minimum": "NaN",
-                  "Maximum": "NaN",
-                  "Interval": "NaN",
-                  "DateTimeAxis": false,
-                  "CrossesAtZero": false
-                }
-              ],
-              "LegendPosition": 0,
-              "LegendOrientation": 0,
-              "DisabledSeries": [],
-              "LegendOutsideGraph": false,
-              "Name": "Wheat Yield Time Series",
-              "Children": [
-                {
-                  "$type": "Models.Series, Models",
-                  "Type": 1,
-                  "XAxis": 3,
-                  "YAxis": 0,
-                  "ColourArgb": -16777216,
-                  "FactorToVaryColours": null,
-                  "FactorToVaryMarkers": null,
-                  "FactorToVaryLines": null,
-                  "Marker": 0,
-                  "MarkerSize": 0,
-                  "Line": 0,
-                  "LineThickness": 0,
-                  "TableName": "ReportCrop",
-                  "XFieldName": "Clock.Today",
-                  "YFieldName": "Yield",
-                  "X2FieldName": null,
-                  "Y2FieldName": null,
-                  "ShowInLegend": true,
-                  "IncludeSeriesNameInLegend": false,
-                  "Cumulative": false,
-                  "CumulativeX": false,
-                  "Filter": null,
-                  "Name": "Wheat Yield",
+                  "$type": "Models.Report, Models",
+                  "VariableNames": [
+                    "[Clock].Today",
+                    "[Slurp].Leaf.CoverTotal",
+                    "[Slurp].Leaf.LAI",
+                    "[Slurp].Leaf.Height",
+                    "[Slurp].Root.LengthDensity",
+                    "[Slurp].Leaf.PotentialEP",
+                    "[Slurp].Root.Depth"
+                  ],
+                  "EventNames": [
+                    "[Clock].DoReport"
+                  ],
+                  "GroupByVariableName": null,
+                  "Name": "ReportSLURP",
                   "Children": [],
                   "IncludeInDocumentation": true,
-                  "Enabled": true,
+                  "Enabled": false,
                   "ReadOnly": false
                 }
               ],
@@ -2372,73 +2424,6 @@
               "IncludeInDocumentation": false,
               "Enabled": true,
               "ReadOnly": false
-            },
-            {
-              "$type": "Models.Graph, Models",
-              "Caption": null,
-              "Axis": [
-                {
-                  "$type": "Models.Axis, Models",
-                  "Type": 3,
-                  "Title": null,
-                  "Inverted": false,
-                  "Minimum": "NaN",
-                  "Maximum": "NaN",
-                  "Interval": "NaN",
-                  "DateTimeAxis": true,
-                  "CrossesAtZero": false
-                },
-                {
-                  "$type": "Models.Axis, Models",
-                  "Type": 0,
-                  "Title": null,
-                  "Inverted": false,
-                  "Minimum": 0.0,
-                  "Maximum": "NaN",
-                  "Interval": "NaN",
-                  "DateTimeAxis": false,
-                  "CrossesAtZero": false
-                }
-              ],
-              "LegendPosition": 3,
-              "LegendOrientation": 0,
-              "DisabledSeries": [],
-              "LegendOutsideGraph": false,
-              "Name": "ProfileWater1m",
-              "Children": [
-                {
-                  "$type": "Models.Series, Models",
-                  "Type": 1,
-                  "XAxis": 3,
-                  "YAxis": 0,
-                  "ColourArgb": -16777216,
-                  "FactorToVaryColours": "Repellency",
-                  "FactorToVaryMarkers": null,
-                  "FactorToVaryLines": null,
-                  "Marker": 11,
-                  "MarkerSize": 0,
-                  "Line": 0,
-                  "LineThickness": 0,
-                  "TableName": "ReportWaterBalance",
-                  "XFieldName": "Clock.Today",
-                  "YFieldName": "ProfileWater1m",
-                  "X2FieldName": null,
-                  "Y2FieldName": null,
-                  "ShowInLegend": true,
-                  "IncludeSeriesNameInLegend": false,
-                  "Cumulative": false,
-                  "CumulativeX": false,
-                  "Filter": null,
-                  "Name": "Series",
-                  "Children": [],
-                  "IncludeInDocumentation": true,
-                  "Enabled": true,
-                  "ReadOnly": false
-                }
-              ],
-              "IncludeInDocumentation": false,
-              "Enabled": true,
-              "ReadOnly": false
             }
           ],
           "IncludeInDocumentation": true,
@@ -2494,6 +2479,140 @@
               "TableName": "ReportWaterBalance",
               "XFieldName": "Clock.Today",
               "YFieldName": "ProfileWater",
+              "X2FieldName": null,
+              "Y2FieldName": null,
+              "ShowInLegend": true,
+              "IncludeSeriesNameInLegend": false,
+              "Cumulative": false,
+              "CumulativeX": false,
+              "Filter": null,
+              "Name": "Series",
+              "Children": [],
+              "IncludeInDocumentation": true,
+              "Enabled": true,
+              "ReadOnly": false
+            }
+          ],
+          "IncludeInDocumentation": false,
+          "Enabled": true,
+          "ReadOnly": false
+        },
+        {
+          "$type": "Models.Graph, Models",
+          "Caption": null,
+          "Axis": [
+            {
+              "$type": "Models.Axis, Models",
+              "Type": 3,
+              "Title": null,
+              "Inverted": false,
+              "Minimum": "NaN",
+              "Maximum": "NaN",
+              "Interval": "NaN",
+              "DateTimeAxis": true,
+              "CrossesAtZero": false
+            },
+            {
+              "$type": "Models.Axis, Models",
+              "Type": 0,
+              "Title": null,
+              "Inverted": false,
+              "Minimum": 0.0,
+              "Maximum": "NaN",
+              "Interval": "NaN",
+              "DateTimeAxis": false,
+              "CrossesAtZero": false
+            }
+          ],
+          "LegendPosition": 3,
+          "LegendOrientation": 0,
+          "DisabledSeries": [],
+          "LegendOutsideGraph": false,
+          "Name": "ProfileWater1m",
+          "Children": [
+            {
+              "$type": "Models.Series, Models",
+              "Type": 1,
+              "XAxis": 3,
+              "YAxis": 0,
+              "ColourArgb": -16777216,
+              "FactorToVaryColours": "Repellency",
+              "FactorToVaryMarkers": null,
+              "FactorToVaryLines": null,
+              "Marker": 11,
+              "MarkerSize": 0,
+              "Line": 0,
+              "LineThickness": 0,
+              "TableName": "ReportWaterBalance",
+              "XFieldName": "Clock.Today",
+              "YFieldName": "ProfileWater1m",
+              "X2FieldName": null,
+              "Y2FieldName": null,
+              "ShowInLegend": true,
+              "IncludeSeriesNameInLegend": false,
+              "Cumulative": false,
+              "CumulativeX": false,
+              "Filter": null,
+              "Name": "Series",
+              "Children": [],
+              "IncludeInDocumentation": true,
+              "Enabled": true,
+              "ReadOnly": false
+            }
+          ],
+          "IncludeInDocumentation": false,
+          "Enabled": true,
+          "ReadOnly": false
+        },
+        {
+          "$type": "Models.Graph, Models",
+          "Caption": null,
+          "Axis": [
+            {
+              "$type": "Models.Axis, Models",
+              "Type": 3,
+              "Title": null,
+              "Inverted": false,
+              "Minimum": "NaN",
+              "Maximum": "NaN",
+              "Interval": "NaN",
+              "DateTimeAxis": true,
+              "CrossesAtZero": false
+            },
+            {
+              "$type": "Models.Axis, Models",
+              "Type": 0,
+              "Title": null,
+              "Inverted": false,
+              "Minimum": 0.0,
+              "Maximum": "NaN",
+              "Interval": "NaN",
+              "DateTimeAxis": false,
+              "CrossesAtZero": false
+            }
+          ],
+          "LegendPosition": 3,
+          "LegendOrientation": 0,
+          "DisabledSeries": [],
+          "LegendOutsideGraph": false,
+          "Name": "PAW",
+          "Children": [
+            {
+              "$type": "Models.Series, Models",
+              "Type": 1,
+              "XAxis": 3,
+              "YAxis": 0,
+              "ColourArgb": -16777216,
+              "FactorToVaryColours": "Repellency",
+              "FactorToVaryMarkers": null,
+              "FactorToVaryLines": null,
+              "Marker": 11,
+              "MarkerSize": 0,
+              "Line": 0,
+              "LineThickness": 0,
+              "TableName": "ReportWaterBalance",
+              "XFieldName": "Clock.Today",
+              "YFieldName": "PAW",
               "X2FieldName": null,
               "Y2FieldName": null,
               "ShowInLegend": true,
@@ -3122,6 +3241,207 @@
             }
           ],
           "IncludeInDocumentation": true,
+          "Enabled": true,
+          "ReadOnly": false
+        },
+        {
+          "$type": "Models.Graph, Models",
+          "Caption": null,
+          "Axis": [
+            {
+              "$type": "Models.Axis, Models",
+              "Type": 3,
+              "Title": null,
+              "Inverted": false,
+              "Minimum": "NaN",
+              "Maximum": "NaN",
+              "Interval": "NaN",
+              "DateTimeAxis": true,
+              "CrossesAtZero": false
+            },
+            {
+              "$type": "Models.Axis, Models",
+              "Type": 0,
+              "Title": "SoilWater content",
+              "Inverted": false,
+              "Minimum": "NaN",
+              "Maximum": "NaN",
+              "Interval": "NaN",
+              "DateTimeAxis": false,
+              "CrossesAtZero": false
+            }
+          ],
+          "LegendPosition": 0,
+          "LegendOrientation": 0,
+          "DisabledSeries": [],
+          "LegendOutsideGraph": false,
+          "Name": "RootDepth",
+          "Children": [
+            {
+              "$type": "Models.Series, Models",
+              "Type": 1,
+              "XAxis": 3,
+              "YAxis": 0,
+              "ColourArgb": -16777216,
+              "FactorToVaryColours": "SimulationName",
+              "FactorToVaryMarkers": null,
+              "FactorToVaryLines": "SimulationName",
+              "Marker": 11,
+              "MarkerSize": 0,
+              "Line": 0,
+              "LineThickness": 0,
+              "TableName": "ReportSLURP",
+              "XFieldName": "Clock.Today",
+              "YFieldName": "Slurp.Root.Depth",
+              "X2FieldName": null,
+              "Y2FieldName": null,
+              "ShowInLegend": true,
+              "IncludeSeriesNameInLegend": false,
+              "Cumulative": false,
+              "CumulativeX": false,
+              "Filter": null,
+              "Name": "Predicted",
+              "Children": [],
+              "IncludeInDocumentation": true,
+              "Enabled": true,
+              "ReadOnly": false
+            }
+          ],
+          "IncludeInDocumentation": false,
+          "Enabled": true,
+          "ReadOnly": false
+        },
+        {
+          "$type": "Models.Graph, Models",
+          "Caption": null,
+          "Axis": [
+            {
+              "$type": "Models.Axis, Models",
+              "Type": 3,
+              "Title": null,
+              "Inverted": false,
+              "Minimum": "NaN",
+              "Maximum": "NaN",
+              "Interval": "NaN",
+              "DateTimeAxis": true,
+              "CrossesAtZero": false
+            },
+            {
+              "$type": "Models.Axis, Models",
+              "Type": 0,
+              "Title": "SoilWater content",
+              "Inverted": false,
+              "Minimum": "NaN",
+              "Maximum": "NaN",
+              "Interval": "NaN",
+              "DateTimeAxis": false,
+              "CrossesAtZero": false
+            }
+          ],
+          "LegendPosition": 0,
+          "LegendOrientation": 0,
+          "DisabledSeries": [],
+          "LegendOutsideGraph": false,
+          "Name": "Height",
+          "Children": [
+            {
+              "$type": "Models.Series, Models",
+              "Type": 1,
+              "XAxis": 3,
+              "YAxis": 0,
+              "ColourArgb": -16777216,
+              "FactorToVaryColours": "SimulationName",
+              "FactorToVaryMarkers": null,
+              "FactorToVaryLines": "SimulationName",
+              "Marker": 11,
+              "MarkerSize": 0,
+              "Line": 0,
+              "LineThickness": 0,
+              "TableName": "ReportSLURP",
+              "XFieldName": "Clock.Today",
+              "YFieldName": "Slurp.Leaf.Height",
+              "X2FieldName": null,
+              "Y2FieldName": null,
+              "ShowInLegend": true,
+              "IncludeSeriesNameInLegend": false,
+              "Cumulative": false,
+              "CumulativeX": false,
+              "Filter": null,
+              "Name": "Predicted",
+              "Children": [],
+              "IncludeInDocumentation": true,
+              "Enabled": true,
+              "ReadOnly": false
+            }
+          ],
+          "IncludeInDocumentation": false,
+          "Enabled": true,
+          "ReadOnly": false
+        },
+        {
+          "$type": "Models.Graph, Models",
+          "Caption": null,
+          "Axis": [
+            {
+              "$type": "Models.Axis, Models",
+              "Type": 3,
+              "Title": null,
+              "Inverted": false,
+              "Minimum": "NaN",
+              "Maximum": "NaN",
+              "Interval": "NaN",
+              "DateTimeAxis": true,
+              "CrossesAtZero": false
+            },
+            {
+              "$type": "Models.Axis, Models",
+              "Type": 0,
+              "Title": "SoilWater content",
+              "Inverted": false,
+              "Minimum": "NaN",
+              "Maximum": "NaN",
+              "Interval": "NaN",
+              "DateTimeAxis": false,
+              "CrossesAtZero": false
+            }
+          ],
+          "LegendPosition": 0,
+          "LegendOrientation": 0,
+          "DisabledSeries": [],
+          "LegendOutsideGraph": false,
+          "Name": "WaterExtraction",
+          "Children": [
+            {
+              "$type": "Models.Series, Models",
+              "Type": 1,
+              "XAxis": 3,
+              "YAxis": 0,
+              "ColourArgb": -16777216,
+              "FactorToVaryColours": "Repellency",
+              "FactorToVaryMarkers": null,
+              "FactorToVaryLines": "Experiment",
+              "Marker": 11,
+              "MarkerSize": 0,
+              "Line": 0,
+              "LineThickness": 0,
+              "TableName": "ReportWaterBalance",
+              "XFieldName": "Clock.Today",
+              "YFieldName": "Soil.WEIRDO.WaterExtraction",
+              "X2FieldName": null,
+              "Y2FieldName": null,
+              "ShowInLegend": true,
+              "IncludeSeriesNameInLegend": false,
+              "Cumulative": true,
+              "CumulativeX": false,
+              "Filter": null,
+              "Name": "Predicted",
+              "Children": [],
+              "IncludeInDocumentation": true,
+              "Enabled": true,
+              "ReadOnly": false
+            }
+          ],
+          "IncludeInDocumentation": false,
           "Enabled": true,
           "ReadOnly": false
         }

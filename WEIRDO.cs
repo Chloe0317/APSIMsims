@@ -18,8 +18,7 @@ using Models.Soils.Standardiser;
 using Models.Climate;
 using System.Linq;
 using Models.Soils.Nutrients;
-
-
+using System.CodeDom;
 
 namespace Models.Soils
 {
@@ -320,6 +319,9 @@ namespace Models.Soils
         [Link(ByName = true)]
         private ISolute urea = null;
 
+        [Link(ByName = true)]
+        private OutputLayers outputlayers = null;
+
         #endregion
 
         #region Class Events
@@ -487,14 +489,7 @@ namespace Models.Soils
         /// <summary>Mapped from parameter set onto Layer structure</summary>
         public double[] MappedMinRepellancyFactor { get; set; }
 
-        /// <summary>Mapped from parameter set onto Layer structure</summary>
-        public double[] MappedNH4 { get; set; }
 
-        /// <summary>Mapped from parameter set onto Layer structure</summary>
-        public double[] MappedUrea { get; set; }
-
-        /// <summary>Mapped from parameter set onto Layer structure</summary>
-        public double[] MappedNO3 { get; set; }
 
 
         #endregion
@@ -686,10 +681,10 @@ namespace Models.Soils
             SaturatedWaterDepth = new double[ProfileLayers];
             HourlyWaterExtraction = new double[ProfileLayers];
             RootLengthDensity = new double[ProfileLayers];
-
             no3Values = new double[ProfileLayers];
             ureaValues = new double[ProfileLayers];
-
+            SoluteFlowEfficiency = new double[ProfileLayers];
+            SoluteFluxEfficiency = new double[ProfileLayers];
             Pores = new Pore[ProfileLayers][];
             PoreWater = new double[ProfileLayers][];
             Capillarity = new double[ProfileLayers][];
@@ -717,9 +712,15 @@ namespace Models.Soils
                     Theta[l][c] = new double();
                 }
             }
+            // Initialise the efficiency factor
+            SoluteFlowEfficiency = MathUtilities.CreateArrayOfValues(1.0, ProfileLayers);
+            SoluteFluxEfficiency = MathUtilities.CreateArrayOfValues(1.0, ProfileLayers);
+
+            // set the solute parameters
+            no3Values = Layers.MapMass(nh4.kgha, outputlayers.Thickness, Thickness);
+            ureaValues = Layers.MapMass(urea.kgha, outputlayers.Thickness, Thickness);
 
             SetSoilProperties(); //Calls a function that applies soil parameters to calculate and set the properties for the soil
-           
             Hourly = new HourlyData();
             SubHourly = new SubHourlyData();
             ProfileSaturation = MathUtilities.Sum(SaturatedWaterDepth);
@@ -891,9 +892,6 @@ namespace Models.Soils
             MappedLowerRepellentWC = Layers.MapConcentration(LowerRepellentWC, Thickness, targetThickness, SAT[SAT.Length - 1]);
             MappedMinRepellancyFactor = Layers.MapConcentration(MinRepellancyFactor, Thickness, targetThickness, SAT[SAT.Length - 1]);
 
-            MappedNH4 = Layers.MapMass(nh4.kgha, Thickness, targetThickness);
-            MappedNO3 = Layers.MapMass(no3.kgha, Thickness, targetThickness);
-            MappedUrea = Layers.MapMass(urea.kgha, Thickness, targetThickness);
 
         }
 
@@ -1363,8 +1361,7 @@ namespace Models.Soils
                 SATmm[l] = MappedSAT[l] * Thickness[l];
                 ProfileSaturation += MappedSAT[l] * Thickness[1];
 
-                no3Values[l] = MappedNO3[l];
-                ureaValues[l] = MappedUrea[l];
+
             }
             doGravitionalPotential();
             for (int l = 0; l < ProfileLayers; l++)
@@ -1378,7 +1375,6 @@ namespace Models.Soils
                     Theta[l][c] = Pores[l][c].ThetaUpper;
                 }
             }
-            
         }
         private double CalcResidueInterception(double Precipitation)
         {

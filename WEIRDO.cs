@@ -311,16 +311,17 @@ namespace Models.Soils
         Plant Plant = null;
 
         [Link(ByName = true)]
-        private ISolute no3 = null;
+        private ISolute NO3 = null;
 
         [Link(ByName = true)]
-        private ISolute nh4 = null;
+        private ISolute NH4 = null;
 
         [Link(ByName = true)]
-        private ISolute urea = null;
+        private ISolute Urea = null;
 
-        [Link(ByName = true)]
-        private OutputLayers outputlayers = null;
+
+        //[Link(ByName = true)]
+        //private OutputLayers outputlayers = null;
 
         #endregion
 
@@ -489,7 +490,14 @@ namespace Models.Soils
         /// <summary>Mapped from parameter set onto Layer structure</summary>
         public double[] MappedMinRepellancyFactor { get; set; }
 
+        /// <summary>Mapped from parameter set onto Layer structure</summary>
+        public double[] MappedNH4 { get; set; }
 
+        /// <summary>Mapped from parameter set onto Layer structure</summary>
+        public double[] MappedUrea { get; set; }
+
+        /// <summary>Mapped from parameter set onto Layer structure</summary>
+        public double[] MappedNO3 { get; set; }
 
 
         #endregion
@@ -594,6 +602,11 @@ namespace Models.Soils
         [JsonIgnore]
         [Units("0-1")]
         public double[] MatrixRelativeWater { get; set;}
+
+        ///<summary> NO3 in solute in each layer </summary>
+        public double[] No3Values { get; set; }
+        ///<summary> Urea in solute in each layer </summary>
+        public double[] UreaValues { get; set; }
         #endregion
 
         #region Properties
@@ -648,8 +661,9 @@ namespace Models.Soils
         private double[] HourlyWaterExtraction { get; set; }
         private double[] RootLengthDensity { get; set; }
         
-        private double[] no3Values { get; set; }
-        private double[] ureaValues { get; set; }
+        [NonSerialized]
+        private double[] targetThickness;
+
         #endregion
 
         #region Event Handlers
@@ -681,8 +695,8 @@ namespace Models.Soils
             SaturatedWaterDepth = new double[ProfileLayers];
             HourlyWaterExtraction = new double[ProfileLayers];
             RootLengthDensity = new double[ProfileLayers];
-            no3Values = new double[ProfileLayers];
-            ureaValues = new double[ProfileLayers];
+            No3Values = new double[ProfileLayers];
+            UreaValues = new double[ProfileLayers];
             SoluteFlowEfficiency = new double[ProfileLayers];
             SoluteFluxEfficiency = new double[ProfileLayers];
             Pores = new Pore[ProfileLayers][];
@@ -713,12 +727,14 @@ namespace Models.Soils
                 }
             }
             // Initialise the efficiency factor
-            SoluteFlowEfficiency = MathUtilities.CreateArrayOfValues(1.0, ProfileLayers);
-            SoluteFluxEfficiency = MathUtilities.CreateArrayOfValues(1.0, ProfileLayers);
+           // SoluteFlowEfficiency = MathUtilities.CreateArrayOfValues(1.0, ProfileLayers);
+           // SoluteFluxEfficiency = MathUtilities.CreateArrayOfValues(1.0, ProfileLayers);
 
-            // set the solute parameters
-            no3Values = Layers.MapMass(nh4.kgha, outputlayers.Thickness, Thickness);
-            ureaValues = Layers.MapMass(urea.kgha, outputlayers.Thickness, Thickness);
+            if (SoluteFluxEfficiency == null)
+                SoluteFluxEfficiency = Enumerable.Repeat<double>(1, ProfileLayers).ToArray();
+            if (SoluteFlowEfficiency == null)
+                SoluteFlowEfficiency = Enumerable.Repeat<double>(1, ProfileLayers).ToArray();
+
 
             SetSoilProperties(); //Calls a function that applies soil parameters to calculate and set the properties for the soil
             Hourly = new HourlyData();
@@ -754,26 +770,47 @@ namespace Models.Soils
             Es = 0;
             WaterExtraction = 0;
             double CropCover = 0;
-            if(Plant != null)
+            if (Plant != null)
                 if (Plant.Leaf != null)
                     CropCover = Plant.Leaf.CoverTotal;
             TotalCover = Math.Min(1, SurfaceOM.Cover + CropCover);
-            double SoilRadn = Met.Radn * (1-TotalCover);
+            double SoilRadn = Met.Radn * (1 - TotalCover);
             double WindRun = Met.Wind * 86400 / 1000 * (1 - TotalCover);
             Eos = ET.PenmanEO(SoilRadn, Met.MeanT, WindRun, Met.VP, Salb, Met.Latitude, Clock.Today.DayOfYear);
             Array.Clear(Hourly.Irrigation, 0, 24);
             Array.Clear(Hourly.Rainfall, 0, 24);
             Array.Clear(Hourly.Drainage, 0, 24);
-
+            // enable leaching
             Array.Clear(Hourly.LeachNO3, 0, 24);
             Array.Clear(Hourly.LeachUrea, 0, 24);
 
             Array.Clear(Hourly.Infiltration, 0, 24);
             Array.Clear(Diffusion, 0, ProfileLayers);
-            if(Plant != null)
-                if(Plant.Root != null)
+            if (Plant != null)
+                if (Plant.Root != null)
                     SetRootLengthDensity();
+
+            //initialise solute transport
+            // Aparrently N is already distributed to targetThickness so without Layers.MapMass is also valid
+            //MappedNH4 = NH4.kgha;           
+            //MappedNO3 = NO3.kgha;
+            //MappedUrea = Urea.kgha;
+
+            //solute at the start of the day
+            MappedNH4 = Layers.MapMass(NH4.kgha, Thickness, targetThickness);
+            MappedNO3 = Layers.MapMass(NO3.kgha, Thickness, targetThickness);
+            MappedUrea = Layers.MapMass(Urea.kgha, Thickness, targetThickness);
+
+            //initialise no3values and ureavalues for daily simulation
+            for (int i = 0; i < ProfileLayers; i++)
+            {
+                No3Values[i] = MappedNO3[i];
+                UreaValues[i] = MappedUrea[i];
+            }
+
         }
+
+
         /// <summary>
         /// Called when the model is ready to work out daily soil water deltas
         /// </summary>
@@ -840,8 +877,8 @@ namespace Models.Soils
             LeachUrea = MathUtilities.Sum(Hourly.LeachUrea);
 
             // Set solute state variables.
-            no3.SetKgHa(SoluteSetterType.Soil, no3Values);
-            urea.SetKgHa(SoluteSetterType.Soil, ureaValues);
+            NO3.SetKgHa(SoluteSetterType.Soil, No3Values);
+            Urea.SetKgHa(SoluteSetterType.Soil, UreaValues);
 
             double SoilWaterContentEOD = MathUtilities.Sum(SWmm);
             double DeltaSWC = SoilWaterContentSOD - SoilWaterContentEOD;
@@ -891,7 +928,7 @@ namespace Models.Soils
             MappedUpperRepellentWC = Layers.MapConcentration(UpperRepellentWC, Thickness, targetThickness, SAT[SAT.Length - 1]);
             MappedLowerRepellentWC = Layers.MapConcentration(LowerRepellentWC, Thickness, targetThickness, SAT[SAT.Length - 1]);
             MappedMinRepellancyFactor = Layers.MapConcentration(MinRepellancyFactor, Thickness, targetThickness, SAT[SAT.Length - 1]);
-
+            this.targetThickness = targetThickness;
 
         }
 
@@ -1091,11 +1128,11 @@ namespace Models.Soils
                     throw new Exception("Error in drainage calculation");
 
                 //Calculate solutes in the drained flux out to the next layer
-                double NO3OutFlux = no3Values[l] * MathUtilities.Divide(OutFluxCurrentLayer, SWmm[l], 0) * SoluteFluxEfficiency[l];
-                double UreaOutFlux = ureaValues[l] * MathUtilities.Divide(OutFluxCurrentLayer, SWmm[l], 0) * SoluteFluxEfficiency[l];
+                double NO3OutFlux = No3Values[l] * MathUtilities.Divide(OutFluxCurrentLayer, SWmm[l], 0) * SoluteFluxEfficiency[l];
+                double UreaOutFlux = UreaValues[l] * MathUtilities.Divide(OutFluxCurrentLayer, SWmm[l], 0) * SoluteFluxEfficiency[l];
                 //Update solute in this layer by removing solute outflux
-                no3Values[l] -= NO3OutFlux;
-                ureaValues[l] -= UreaOutFlux;
+                No3Values[l] -= NO3OutFlux;
+                UreaValues[l] -= UreaOutFlux;
 
 
                 //Distribute water from this layer into the profile below and record drainage out the bottom
@@ -1109,8 +1146,8 @@ namespace Models.Soils
                         DistributWaterInFlux(l1, ref InFluxLayerBelow, SPH);
 
                         //Distribute the soluteOutFlux to the layer below
-                        no3Values[l1] += NO3OutFlux;
-                        ureaValues[l1] += UreaOutFlux;
+                        No3Values[l1] += NO3OutFlux;
+                        UreaValues[l1] += UreaOutFlux;
 
 
                     }
@@ -1125,10 +1162,13 @@ namespace Models.Soils
 
 
                         if (SPH != 1)
+                        {
                             SubHourly.Drainage[Subh] += InFluxLayerBelow;
                             //Remove SoluteOutFlux as Leached solute
                             SubHourly.LeachNO3[Subh] += NO3OutFlux;
                             SubHourly.LeachUrea[Subh] += UreaOutFlux;
+                        }
+
                     }
                 }
             }
@@ -1223,19 +1263,19 @@ namespace Models.Soils
                 double NetDiffusion = UpwardDiffusion - DownwardDiffusion;
 
                 // for solute moving up from layer below
-                double NO3InFluxUp = no3Values[l + 1] * (UpwardDiffusion / SWmm[l + 1]) * SoluteFlowEfficiency[l + 1];
-                double UreaInFluxUp = ureaValues[l + 1] * (UpwardDiffusion / SWmm[l + 1]) * SoluteFlowEfficiency[l + 1];
+                double NO3InFluxUp = No3Values[l + 1] * (UpwardDiffusion / SWmm[l + 1]) * SoluteFlowEfficiency[l + 1];
+                double UreaInFluxUp = UreaValues[l + 1] * (UpwardDiffusion / SWmm[l + 1]) * SoluteFlowEfficiency[l + 1];
 
                 // for solute moving down from this layer
-                double NO3OutFluxDown = no3Values[l] + NO3InFluxUp * (DownwardDiffusion / SWmm[l]) * SoluteFluxEfficiency[l];
-                double UreaOutFluxDown = ureaValues[l] + UreaInFluxUp * (DownwardDiffusion / SWmm[l]) * SoluteFluxEfficiency[l];
+                double NO3OutFluxDown = (No3Values[l] + NO3InFluxUp) * (DownwardDiffusion / SWmm[l]) * SoluteFluxEfficiency[l];
+                double UreaOutFluxDown = (UreaValues[l] + UreaInFluxUp) * (DownwardDiffusion / SWmm[l]) * SoluteFluxEfficiency[l];
 
                 // update change in solute to this layer and to the layer below
-                no3Values[l] = no3Values[l] + NO3InFluxUp - NO3OutFluxDown;
-                ureaValues[l] = ureaValues[l] + UreaInFluxUp - UreaOutFluxDown;
+                No3Values[l] = No3Values[l] + NO3InFluxUp - NO3OutFluxDown;
+                UreaValues[l] = UreaValues[l] + UreaInFluxUp - UreaOutFluxDown;
 
-                no3Values[l + 1] = no3Values[l + 1] - NO3InFluxUp + NO3OutFluxDown;
-                ureaValues[l + 1] = ureaValues[l + 1] - UreaInFluxUp + UreaOutFluxDown;
+                No3Values[l + 1] = No3Values[l + 1] - NO3InFluxUp + NO3OutFluxDown;
+                UreaValues[l + 1] = UreaValues[l + 1] - UreaInFluxUp + UreaOutFluxDown;
 
                 Diffusion[l] += NetDiffusion;
                 if (NetDiffusion > 0) //Bring water into current layer and remove from layer below
@@ -1493,6 +1533,7 @@ namespace Models.Soils
                 for (int c = 0; c < PoreCompartments; c++)
                 {
                     if (Pores[l][c].WaterFilledVolume == 0)
+
                         PoreWater[l][c] = 0;
                     else
                         PoreWater[l][c] = Pores[l][c].RelativeWaterContent;
